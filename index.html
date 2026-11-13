@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RCM Budget Request</title>
+<meta name="theme-color" content="#17458f">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{--blue:#17458f;--blue-d:#0f2f66;--gold:#f7a81b;--bg:#f4f6fb;--ink:#1c2433;--mut:#6b7488;--line:#e2e6ef;--red:#c0392b;--green:#1e8e5a}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  button{font:inherit;cursor:pointer}
+  .hidden{display:none!important}
+
+  /* ---------- login (standalone use only) ---------- */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--blue-d),var(--blue))}
+  .card{background:#fff;border-radius:16px;padding:36px 32px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .logo{width:64px;height:64px;border-radius:50%;background:var(--gold);color:var(--blue-d);display:grid;place-items:center;font-weight:800;font-size:22px;margin:0 auto 14px;border:4px solid var(--blue)}
+  .card h1{font-size:20px;margin:0 0 4px;color:var(--blue-d)}
+  .card p{color:var(--mut);margin:0 0 22px;font-size:14px}
+  #gbtn{display:flex;justify-content:center;min-height:44px}
+  .err{color:var(--red);font-size:13px;margin-top:16px;min-height:18px}
+  .busy{color:var(--mut);font-size:13px;margin-top:12px}
+
+  /* ---------- app shell ---------- */
+  header{background:var(--blue);color:#fff;display:flex;align-items:center;gap:14px;padding:0 16px;height:56px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:10}
+  header .brand{display:flex;align-items:center;gap:10px;font-weight:700;white-space:nowrap}
+  header .brand .logo{width:34px;height:34px;font-size:12px;margin:0;border-width:2px}
+  nav{display:flex;gap:4px;flex:1;height:56px}
+  nav button{background:none;border:0;color:#cfdcf5;padding:0 14px;height:100%;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-3px}
+  nav button:hover{color:#fff}
+  nav button.on{color:#fff;border-bottom-color:var(--gold);font-weight:600}
+  .me{display:flex;align-items:center;gap:10px;font-size:13px}
+  .me img{width:30px;height:30px;border-radius:50%;background:#fff}
+  .me .who{line-height:1.15;text-align:right}
+  .me .who small{color:#b8c8ea;display:block}
+  .out{background:rgba(255,255,255,.12);border:0;color:#fff;padding:7px 12px;border-radius:6px}
+  .out:hover{background:rgba(255,255,255,.22)}
+  main{padding:24px;max-width:1000px;margin:0 auto}
+  h2{margin:0 0 4px;color:var(--blue-d)}
+  .note{color:var(--mut);font-size:13px;margin:4px 0 0}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:16px;overflow-x:auto}
+  .panel h3{margin:0 0 12px;color:var(--blue-d)}
+  .panel.accent{border-top:4px solid var(--gold)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1/-1}
+  label.lbl{font-size:13px;font-weight:600;color:var(--blue-d)}
+  label.lbl b{color:var(--red)}
+  input[type=text],input[type=date],input[type=number],input[type=email],select,textarea{padding:10px 12px;border:1px solid #cfd5e3;border-radius:8px;font:inherit;background:#fff;width:100%;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid rgba(23,69,143,.25);border-color:var(--blue)}
+  input[readonly]{background:#eef1f8;color:var(--mut)}
+  textarea{min-height:130px;resize:vertical}
+  .words{font-size:12px;color:var(--mut);min-height:16px;font-style:italic}
+  .amt{position:relative}
+  .amt span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut);font-weight:600}
+  .amt input{padding-left:30px;font-weight:600}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{background:var(--blue);color:#fff;border:0;padding:10px 16px;border-radius:8px;font-weight:600}
+  .btn:hover{background:var(--blue-d)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.gold{background:var(--gold);color:var(--blue-d)}
+  .btn.gold:hover{background:#e89a10}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .btn.ghost{background:#eef1f8;color:var(--blue-d)}
+  .btn.danger{background:#fdecea;color:var(--red)}
+  .actions{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;background:#e6eefc;color:var(--blue)}
+  .badge.new{background:#fff3da;color:#9a6200}
+
+  table.list{width:100%;border-collapse:collapse;font-size:14px}
+  table.list th,table.list td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.list th{font-size:12px;text-transform:uppercase;color:var(--mut);letter-spacing:.04em}
+  td.num,th.num{text-align:right}
+  td.acts{white-space:nowrap}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .toolbar input{max-width:280px}
+  .toolbar label{font-size:13px;display:flex;gap:5px;align-items:center}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1c2433;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:90vw;text-align:center}
+  #toast.show{opacity:1}
+
+  @media(max-width:700px){
+    header{padding:0 12px;gap:8px}
+    .me .who,.brand span,#signout{display:none}
+    main{padding:16px}
+    .grid2{grid-template-columns:1fr}
+    input,select,textarea{font-size:16px!important}
+    .row .btn{flex:1}
+    table.list,table.list thead,table.list tbody,table.list tr,table.list td{display:block;width:100%}
+    table.list thead{display:none}
+    table.list tr{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:10px}
+    table.list td{border:0;padding:5px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;text-align:right}
+    table.list td[data-label]::before{content:attr(data-label);font-size:11px;text-transform:uppercase;color:var(--mut);letter-spacing:.04em;text-align:left}
+    td.acts{justify-content:flex-start;white-space:normal}
+    .btn.sm{padding:8px 12px;font-size:13px}
+  }
+
+  /* ---------- printable request ---------- */
+  #printArea{display:none}
+  .sheet{font-family:Georgia,"Times New Roman",serif;color:#000;font-size:12.5pt;line-height:1.35}
+  .sheet .lh{text-align:center;border-bottom:3px double #17458f;padding-bottom:8px;margin-bottom:12px}
+  .sheet .lgo{width:54px;height:54px;border-radius:50%;background:#f7a81b;color:#0f2f66;border:3px solid #17458f;display:grid;place-items:center;font:bold 15pt system-ui,Arial,sans-serif;margin:0 auto 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet .lh .club{font-size:17pt;font-weight:bold;color:#17458f;letter-spacing:.02em}
+  .sheet .lh .sub{font-size:9.5pt;color:#444}
+  .sheet h1{font-size:16pt;text-align:center;margin:10px 0 2px;letter-spacing:.08em}
+  .sheet .desc{text-align:center;font-size:9.5pt;color:#444;margin:0 0 12px;font-style:italic}
+  .sheet .meta{display:flex;justify-content:space-between;font-size:10.5pt;margin-bottom:10px}
+  .sheet .types{display:flex;flex-wrap:wrap;gap:6px 22px;margin:0 0 12px;font-size:11pt}
+  .sheet .box{display:inline-block;width:12px;height:12px;border:1.4px solid #000;margin-right:6px;vertical-align:-2px;text-align:center;line-height:10px;font-size:11px;font-weight:bold}
+  .sheet table{width:100%;border-collapse:collapse;margin-bottom:14px}
+  .sheet td{border:1px solid #000;padding:7px 10px;vertical-align:top}
+  .sheet td.k{width:32%;background:#eef1f8;font-weight:bold;font-size:10.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet td.big{font-size:14pt;font-weight:bold}
+  .sheet .part{min-height:150px;white-space:pre-wrap}
+  .sheet .sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;text-align:center}
+  .sheet .sigs .line{border-top:1px solid #000;padding-top:4px;font-weight:bold;font-size:11pt;min-height:22px}
+  .sheet .sigs small{display:block;font-size:9pt;color:#444}
+  .sheet .treas{margin-top:26px;border:1px dashed #555;padding:8px 12px;font-size:10.5pt}
+  .sheet .treas b{display:block;margin-bottom:6px}
+  .sheet .treas .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .sheet .treas span{display:block;border-bottom:1px solid #000;height:18px;margin-top:4px}
+  .sheet .foot{margin-top:16px;font-size:8.5pt;color:#555;text-align:center}
+  @page{size:A4;margin:14mm}
+  @media print{
+    html,body{background:#fff}
+    #login,#app,#toast{display:none!important}
+    #printArea{display:block!important}
+  }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="card">
+    <div class="logo">RCM</div>
+    <h1>Budget Request</h1>
+    <p>Rotary Club of Makati – sign in with your authorized Google account</p>
+    <div id="gbtn"></div>
+    <div class="busy hidden" id="busy">Checking access…</div>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <div class="brand"><div class="logo">RCM</div><span>Budget Request</span></div>
+    <nav id="nav">
+      <button data-t="new" class="on">New Request</button>
+      <button data-t="list">My Requests</button>
+    </nav>
+    <div class="me">
+      <div class="who"><span id="meName"></span><small id="meEmail"></small></div>
+      <img id="mePic" alt="">
+      <button class="out" id="signout">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== NEW / EDIT ===== -->
+    <section id="vNew">
+      <h2 id="formTitle">Budget Request Form</h2>
+      <p class="note">Use this form to process check payables to club projects, reimbursements, cash advances and other operating expenses incurred in implementing activities / programs. <span style="color:var(--red)">*</span> Required.</p>
+
+      <div class="panel accent">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <span class="badge new" id="refBadge">New request</span>
+          <span class="note" style="margin:0">Saved under your account</span>
+        </div>
+        <div class="grid2">
+          <div class="field full">
+            <label class="lbl">Requested by (your Google account)</label>
+            <input type="email" id="fEmail" readonly>
+          </div>
+          <div class="field">
+            <label class="lbl" for="fCommittee">Committee <b>*</b></label>
+            <input type="text" id="fCommittee" placeholder="Your answer" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="lbl" for="fType">Type of request</label>
+            <select id="fType">
+              <option>Check payable</option>
+              <option>Reimbursement</option>
+              <option>Cash advance</option>
+              <option>Other operating expense</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl" for="fPayee">Check payable to <b>*</b></label>
+            <input type="text" id="fPayee" placeholder="Your answer" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="lbl" for="fDate">Date needed <b>*</b></label>
+            <input type="date" id="fDate">
+          </div>
+          <div class="field">
+            <label class="lbl" for="fAmount">Amount of request <b>*</b></label>
+            <div class="amt"><span>₱</span><input type="text" id="fAmount" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
+            <div class="words" id="fWords"></div>
+          </div>
+          <div class="field full">
+            <label class="lbl" for="fPart">Particulars <b>*</b></label>
+            <textarea id="fPart" placeholder="Your answer – describe the project / activity, items and purpose of the request"></textarea>
+          </div>
+        </div>
+        <div class="row actions">
+          <button class="btn" id="saveBtn">💾 Save request</button>
+          <button class="btn gold" id="printBtn">🖨 Print</button>
+          <button class="btn ghost" id="clearBtn">Clear / New</button>
+        </div>
+        <p class="note">Tip: <b>Print</b> works before or after saving. Saved requests can be reopened, edited and reprinted from <b>My Requests</b>.</p>
+      </div>
+    </section>
+
+    <!-- ===== LIST ===== -->
+    <section id="vList" class="hidden">
+      <h2 id="listTitle">My Requests</h2>
+      <p class="note">Open a request to edit it, or print it again.</p>
+      <div class="panel">
+        <div class="toolbar">
+          <input type="text" id="q" placeholder="Search committee, payee, particulars…">
+          <label id="allWrap" class="hidden"><input type="checkbox" id="allChk"> Show everyone's requests (admin)</label>
+          <button class="btn sm ghost" id="refreshBtn">↻ Refresh</button>
+        </div>
+        <div id="listBody">Loading…</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="printArea"></div>
+<div id="toast"></div>
+
+<script>
+/* ============ SETTINGS ============ */
+const API_URL   = "https://script.google.com/macros/s/AKfycbwEvblmxsDWTX9U4PpflCSZfXsqFnHyqZXG98ljnwK4c5X0va2_H3uzW_-npUZZFlsQTA/exec";
+const CLIENT_ID = "475258710332-ij24hs1dumfhlc50t5fggkpv6l3c0ec0.apps.googleusercontent.com"; // same one as the admin portal
+const PORTAL_ORIGIN = "https://rotaryclubofmakati.github.io"; // portal is hosted on the same GitHub account
+const SIGNATORIES = { treasurer: "Club Treasurer", president: "Club President" };
+/* ================================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast = m => { const t=$("#toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); };
+const peso = n => "₱" + Number(n||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2});
+const ERR = { not_authorized:"This account does not have access to Budget Request. Please ask a portal admin to add it.",
+  auth:"Your sign-in expired. Please sign in again.", forbidden:"You can only change your own requests.",
+  missing:"Please fill in all required fields.", bad_amount:"Enter a valid amount greater than zero.", not_found:"Request not found." };
+
+let token = "", user = null, editId = "", editRef = "", list = [];
+const inFrame = window.self !== window.top;
+
+/* ---------- API ---------- */
+async function api(action, data = {}) {
+  const r = await fetch(API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify({ token, action, ...data }) });
+  const j = await r.json();
+  if (!j.ok) { const e = new Error(ERR[j.error] || j.message || j.error); e.code = j.error; throw e; }
+  return j;
+}
+
+/* ---------- sign-in: token from the portal (iframe) or Google button (standalone) ---------- */
+function showLogin(msg){
+  user = null; token = "";
+  $("#app").classList.add("hidden"); $("#login").classList.remove("hidden");
+  $("#busy").classList.add("hidden"); $("#gbtn").classList.remove("hidden");
+  $("#loginErr").textContent = msg || "";
+}
+async function enter(){
+  $("#busy").classList.remove("hidden"); $("#gbtn").classList.add("hidden"); $("#loginErr").textContent = "";
+  try {
+    const j = await api("me");
+    user = j.user;
+    $("#meName").textContent = user.name || user.email;
+    $("#meEmail").textContent = user.email;
+    $("#mePic").src = user.picture || "";
+    if (!user.picture) $("#mePic").classList.add("hidden");
+    $("#fEmail").value = user.email;
+    $("#allWrap").classList.toggle("hidden", user.role !== "admin");
+    $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
+    if (!$("#fCommittee").value && !$("#fPayee").value) loadDraft();
+  } catch(e) { showLogin(e.message.includes("fetch") ? "Cannot reach the server. Check the API_URL and deployment." : e.message); }
+}
+function onToken(t, fromPortal){
+  token = t;
+  if (user) return;               // silent refresh: keep working
+  enter();
+}
+window.addEventListener("message", e => {
+  if (e.source !== window.parent || !e.data || e.data.type !== "rcm-token") return;
+  onToken(e.data.token, true);
+});
+if (inFrame) {
+  // ask the portal for the signed-in user's token (retry until it answers)
+  let tries = 0;
+  const ask = () => { if (token || tries++ > 20) { if(!token) showLogin("Open this page from the RCM Admin Portal, or sign in below."); return; }
+    try { window.parent.postMessage({ type:"rcm-need-token" }, "*"); } catch(_){} setTimeout(ask, 400); };
+  $("#busy").classList.remove("hidden"); $("#gbtn").classList.add("hidden");
+  window.addEventListener("load", ask);
+}
+window.addEventListener("load", () => {
+  const wait = setInterval(() => {
+    if (!window.google || !google.accounts) return;
+    clearInterval(wait);
+    google.accounts.id.initialize({ client_id: CLIENT_ID, auto_select: !inFrame, callback: r => onToken(r.credential) });
+    google.accounts.id.renderButton($("#gbtn"), { theme:"outline", size:"large", text:"signin_with", shape:"rectangular" });
+  }, 100);
+});
+$("#signout").onclick = () => { try{ google.accounts.id.disableAutoSelect(); }catch(_){} showLogin(); };
+async function guard(fn){            // run an API call; on expired token ask the portal for a fresh one
+  try { return await fn(); }
+  catch(e){
+    if (e.code === "auth") {
+      if (inFrame) { try{ window.parent.postMessage({ type:"rcm-need-token" }, "*"); }catch(_){} toast("Refreshing sign-in… please try again"); }
+      else showLogin(e.message);
+    } else toast(e.message);
+    return null;
+  }
+}
+
+/* ---------- tabs ---------- */
+function show(t){
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+  $("#vNew").classList.toggle("hidden", t !== "new");
+  $("#vList").classList.toggle("hidden", t !== "list");
+  if (t === "list") loadList();
+}
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => show(b.dataset.t));
+
+/* ---------- amount helpers ---------- */
+const ONES = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+const TENS = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+function below1000(n){ let s=""; if(n>=100){ s+=ONES[Math.floor(n/100)]+" Hundred"; n%=100; if(n) s+=" "; }
+  if(n>=20){ s+=TENS[Math.floor(n/10)]; if(n%10) s+="-"+ONES[n%10]; } else if(n>0) s+=ONES[n]; return s; }
+function amountWords(v){
+  v = Math.round(Number(v)*100); if (!(v>0)) return "";
+  let pesos = Math.floor(v/100), cents = v%100, parts = [];
+  [[1e9,"Billion"],[1e6,"Million"],[1e3,"Thousand"]].forEach(([d,n])=>{ if(pesos>=d){ parts.push(below1000(Math.floor(pesos/d))+" "+n); pesos%=d; } });
+  if (pesos>0) parts.push(below1000(pesos));
+  let w = parts.join(" ") + " Pesos";
+  w += cents ? " and " + String(cents).padStart(2,"0") + "/100" : " Only";
+  return w;
+}
+const parseAmt = s => { const n = parseFloat(String(s).replace(/[^0-9.]/g,"")); return isFinite(n) ? n : 0; };
+$("#fAmount").addEventListener("input", () => { $("#fWords").textContent = amountWords(parseAmt($("#fAmount").value)); saveDraft(); });
+$("#fAmount").addEventListener("blur", () => { const n = parseAmt($("#fAmount").value); $("#fAmount").value = n ? n.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}) : ""; });
+$("#fAmount").addEventListener("focus", () => { const n = parseAmt($("#fAmount").value); $("#fAmount").value = n ? String(n) : ""; });
+
+/* ---------- form state ---------- */
+const fields = () => ({ type:$("#fType").value, committee:$("#fCommittee").value.trim(), payee:$("#fPayee").value.trim(),
+  dateNeeded:$("#fDate").value, amount:parseAmt($("#fAmount").value), particulars:$("#fPart").value.trim() });
+function fillForm(r){
+  $("#fType").value = r.type || "Check payable"; $("#fCommittee").value = r.committee || ""; $("#fPayee").value = r.payee || "";
+  $("#fDate").value = r.dateNeeded || ""; $("#fAmount").value = r.amount ? Number(r.amount).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}) : "";
+  $("#fPart").value = r.particulars || ""; $("#fWords").textContent = amountWords(r.amount);
+}
+function setEditing(id, ref){
+  editId = id || ""; editRef = ref || "";
+  $("#refBadge").textContent = editId ? "Editing " + editRef : "New request";
+  $("#refBadge").className = "badge" + (editId ? "" : " new");
+  $("#formTitle").textContent = editId ? "Edit Budget Request" : "Budget Request Form";
+}
+function clearForm(){ fillForm({}); setEditing(""); try{ localStorage.removeItem("rcm_budget_draft"); }catch(_){} }
+function valid(f){
+  if (!f.committee || !f.payee || !f.dateNeeded || !f.particulars) { toast(ERR.missing); return false; }
+  if (!(f.amount > 0)) { toast(ERR.bad_amount); return false; }
+  return true;
+}
+/* unsent draft is remembered in this browser only */
+function saveDraft(){ if (editId) return; try{ localStorage.setItem("rcm_budget_draft", JSON.stringify(fields())); }catch(_){} }
+function loadDraft(){ try{ const d = JSON.parse(localStorage.getItem("rcm_budget_draft")||"null"); if (d) fillForm(d); }catch(_){} }
+["fType","fCommittee","fPayee","fDate","fPart"].forEach(id => $("#"+id).addEventListener("input", saveDraft));
+
+$("#clearBtn").onclick = () => { if (editId || fields().committee || fields().payee || fields().particulars) { if (!confirm("Clear the form and start a new request?")) return; } clearForm(); };
+
+$("#saveBtn").onclick = async () => {
+  const f = fields(); if (!valid(f)) return;
+  $("#saveBtn").disabled = true;
+  const j = await guard(() => api("save", { id: editId, request: f }));
+  $("#saveBtn").disabled = false;
+  if (j) { setEditing(j.request.id, j.request.ref); toast("Saved as " + j.request.ref); try{ localStorage.removeItem("rcm_budget_draft"); }catch(_){} }
+};
+
+/* ---------- list ---------- */
+async function loadList(){
+  const all = user.role === "admin" && $("#allChk").checked;
+  $("#listTitle").textContent = all ? "All Requests" : "My Requests";
+  $("#listBody").textContent = "Loading…";
+  const j = await guard(() => api("list", { all }));
+  if (!j) { $("#listBody").textContent = "Could not load requests."; return; }
+  list = j.requests; renderList();
+}
+const fmtDate = iso => { if(!iso) return ""; const d = new Date(iso.length===10 ? iso+"T00:00:00" : iso); return isNaN(d) ? iso : d.toLocaleDateString("en-PH",{year:"numeric",month:"short",day:"numeric"}); };
+function renderList(){
+  const q = $("#q").value.trim().toLowerCase();
+  const rows = list.filter(r => !q || [r.ref,r.committee,r.payee,r.particulars,r.email].join(" ").toLowerCase().includes(q));
+  if (!rows.length) { $("#listBody").innerHTML = '<p class="note">No requests found.</p>'; return; }
+  const showWho = user.role === "admin" && $("#allChk").checked;
+  $("#listBody").innerHTML = `<table class="list"><thead><tr><th>Ref</th><th>Committee</th><th>Payable to</th><th>Date needed</th><th class="num">Amount</th>${showWho?"<th>Requested by</th>":""}<th></th></tr></thead><tbody>${
+    rows.map(r => `<tr data-id="${esc(r.id)}">
+      <td data-label="Ref"><b>${esc(r.ref)}</b></td>
+      <td data-label="Committee">${esc(r.committee)}</td>
+      <td data-label="Payable to">${esc(r.payee)}</td>
+      <td data-label="Date needed">${esc(fmtDate(r.dateNeeded))}</td>
+      <td data-label="Amount" class="num"><b>${peso(r.amount)}</b></td>
+      ${showWho?`<td data-label="By">${esc(r.email)}</td>`:""}
+      <td class="acts"><button class="btn sm" data-a="edit">Open</button> <button class="btn sm ghost" data-a="print">🖨 Print</button> <button class="btn sm danger" data-a="del">Delete</button></td></tr>`).join("")
+  }</tbody></table>`;
+  $("#listBody").querySelectorAll("tr[data-id]").forEach(tr => {
+    const r = list.find(x => x.id === tr.dataset.id);
+    tr.querySelector('[data-a="edit"]').onclick = () => { fillForm(r); setEditing(r.id, r.ref); show("new"); window.scrollTo(0,0); };
+    tr.querySelector('[data-a="print"]').onclick = () => printRequest(r);
+    tr.querySelector('[data-a="del"]').onclick = async () => {
+      if (!confirm("Delete request " + r.ref + "? This cannot be undone.")) return;
+      if (await guard(() => api("delete", { id: r.id }))) { toast("Deleted"); if (editId === r.id) clearForm(); loadList(); }
+    };
+  });
+}
+$("#q").oninput = renderList;
+$("#allChk").onchange = loadList;
+$("#refreshBtn").onclick = loadList;
+
+/* ---------- print ---------- */
+const longDate = iso => { if(!iso) return ""; const d = new Date(iso.length===10 ? iso+"T00:00:00" : iso); return isNaN(d) ? iso : d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}); };
+function printRequest(r){
+  const types = ["Check payable","Reimbursement","Cash advance","Other operating expense"];
+  const by = r.name || (r.email === user.email ? user.name : "") || r.email;
+  const html = `<div class="sheet">
+    <div class="lh"><div class="lgo">RCM</div><div class="club">ROTARY CLUB OF MAKATI</div><div class="sub">Admin Systems · Budget Request</div></div>
+    <h1>BUDGET REQUEST FORM</h1>
+    <p class="desc">For check payables to club projects, reimbursements, cash advances and other operating expenses incurred in implementing activities / programs.</p>
+    <div class="meta"><span><b>Ref. No.:</b> ${esc(r.ref || "— (not yet saved)")}</span><span><b>Date prepared:</b> ${esc(longDate(r.createdAt || new Date().toISOString()))}</span></div>
+    <div class="types">${types.map(t => `<span><span class="box">${r.type===t?"✓":""}</span>${esc(t)}</span>`).join("")}</div>
+    <table>
+      <tr><td class="k">Committee</td><td>${esc(r.committee)}</td></tr>
+      <tr><td class="k">Check payable to</td><td>${esc(r.payee)}</td></tr>
+      <tr><td class="k">Date needed</td><td>${esc(longDate(r.dateNeeded))}</td></tr>
+      <tr><td class="k">Amount of request</td><td class="big">${peso(r.amount)}<div style="font-size:10pt;font-weight:normal;font-style:italic;margin-top:2px">${esc(amountWords(r.amount))}</div></td></tr>
+      <tr><td class="k">Particulars</td><td class="part">${esc(r.particulars)}</td></tr>
+      <tr><td class="k">Requested by (account)</td><td>${esc(by)}<br><span style="font-size:10pt">${esc(r.email || user.email)}</span></td></tr>
+    </table>
+    <div class="sigs">
+      <div><div class="line">${esc(by)}</div><small>Requested by / Committee Chair</small></div>
+      <div><div class="line">&nbsp;</div><small>Noted by: ${esc(SIGNATORIES.treasurer)}</small></div>
+      <div><div class="line">&nbsp;</div><small>Approved by: ${esc(SIGNATORIES.president)}</small></div>
+    </div>
+    <div class="treas"><b>For Treasurer's use</b><div class="cols">
+      <div>Check no.<span></span></div><div>Bank<span></span></div><div>Date released<span></span></div></div></div>
+    <div class="foot">Generated from the RCM Admin Portal · ${esc(new Date().toLocaleString("en-PH"))}</div>
+  </div>`;
+  // Print from a clean window so the letterhead always shows (printing from inside the portal's frame is unreliable)
+  const w = window.open("", "_blank");
+  if (w) {
+    const css = document.querySelector("style").textContent + "#printArea{display:block!important}body{background:#fff}";
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Budget Request ${esc(r.ref||"")}</title><style>${css}</style></head><body><div id="printArea">${html}</div></body></html>`);
+    w.document.close();
+    w.onload = () => { w.focus(); w.print(); };
+    setTimeout(() => { try { if (w.document.readyState === "complete" && !w.__p) { w.__p = 1; w.focus(); w.print(); } } catch(_){} }, 600);
+  } else {                                       // popup blocked: print this page instead
+    $("#printArea").innerHTML = html;
+    setTimeout(() => window.print(), 50);
+  }
+}
+$("#printBtn").onclick = () => {
+  const f = fields(); if (!valid(f)) return;
+  printRequest({ ...f, ref: editRef, email: user.email, name: user.name, createdAt: editId ? (list.find(x=>x.id===editId)||{}).createdAt : "" });
+};
+</script>
+</body>
+</html>
