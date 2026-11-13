@@ -46,6 +46,7 @@
   .panel h3{margin:0 0 12px;color:var(--blue-d)}
   .panel.accent{border-top:4px solid var(--gold)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
   .field{display:flex;flex-direction:column;gap:6px}
   .field.full{grid-column:1/-1}
   label.lbl{font-size:13px;font-weight:600;color:var(--blue-d)}
@@ -86,7 +87,7 @@
     header{padding:0 12px;gap:8px}
     .me .who,.brand span,#signout{display:none}
     main{padding:16px}
-    .grid2{grid-template-columns:1fr}
+    .grid2,.grid3{grid-template-columns:1fr}
     input,select,textarea{font-size:16px!important}
     .row .btn{flex:1}
     table.list,table.list thead,table.list tbody,table.list tr,table.list td{display:block;width:100%}
@@ -100,30 +101,31 @@
 
   /* ---------- printable request ---------- */
   #printArea{display:none}
-  .sheet{font-family:Georgia,"Times New Roman",serif;color:#000;font-size:12.5pt;line-height:1.35}
+  .sheet{font-family:Georgia,"Times New Roman",serif;color:#000;font-size:11.5pt;line-height:1.35;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
+  .sheet *{box-sizing:border-box}
   .sheet .lh{text-align:center;border-bottom:3px double #17458f;padding-bottom:8px;margin-bottom:12px}
   .sheet .lgo{width:54px;height:54px;border-radius:50%;background:#f7a81b;color:#0f2f66;border:3px solid #17458f;display:grid;place-items:center;font:bold 15pt system-ui,Arial,sans-serif;margin:0 auto 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .sheet .lh .club{font-size:17pt;font-weight:bold;color:#17458f;letter-spacing:.02em}
   .sheet .lh .sub{font-size:9.5pt;color:#444}
   .sheet h1{font-size:16pt;text-align:center;margin:10px 0 2px;letter-spacing:.08em}
   .sheet .desc{text-align:center;font-size:9.5pt;color:#444;margin:0 0 12px;font-style:italic}
-  .sheet .meta{display:flex;justify-content:space-between;font-size:10.5pt;margin-bottom:10px}
+  .sheet .meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:10.5pt;margin-bottom:10px}
   .sheet .types{display:flex;flex-wrap:wrap;gap:6px 22px;margin:0 0 12px;font-size:11pt}
   .sheet .box{display:inline-block;width:12px;height:12px;border:1.4px solid #000;margin-right:6px;vertical-align:-2px;text-align:center;line-height:10px;font-size:11px;font-weight:bold}
-  .sheet table{width:100%;border-collapse:collapse;margin-bottom:14px}
-  .sheet td{border:1px solid #000;padding:7px 10px;vertical-align:top}
+  .sheet table{width:100%;table-layout:fixed;border-collapse:collapse;margin-bottom:14px}
+  .sheet td{border:1px solid #000;padding:7px 10px;vertical-align:top;word-wrap:break-word;overflow-wrap:anywhere}
   .sheet td.k{width:32%;background:#eef1f8;font-weight:bold;font-size:10.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .sheet td.big{font-size:14pt;font-weight:bold}
   .sheet .part{min-height:150px;white-space:pre-wrap}
-  .sheet .sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:38px;text-align:center}
-  .sheet .sigs .line{border-top:1px solid #000;padding-top:4px;font-weight:bold;font-size:11pt;min-height:22px}
+  .sheet .sigs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:38px;text-align:center}
+  .sheet .sigs .line{border-top:1px solid #000;padding-top:4px;font-weight:bold;font-size:11pt;min-height:22px;overflow-wrap:anywhere}
   .sheet .sigs small{display:block;font-size:9pt;color:#444}
   .sheet .treas{margin-top:26px;border:1px dashed #555;padding:8px 12px;font-size:10.5pt}
   .sheet .treas b{display:block;margin-bottom:6px}
-  .sheet .treas .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .sheet .treas .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
   .sheet .treas span{display:block;border-bottom:1px solid #000;height:18px;margin-top:4px}
   .sheet .foot{margin-top:16px;font-size:8.5pt;color:#555;text-align:center}
-  @page{size:A4;margin:14mm}
+  @page{size:auto;margin:16mm 15mm}
   @media print{
     html,body{background:#fff}
     #login,#app,#toast{display:none!important}
@@ -150,6 +152,7 @@
     <nav id="nav">
       <button data-t="new" class="on">New Request</button>
       <button data-t="list">My Requests</button>
+      <button data-t="log">Save Log</button>
     </nav>
     <div class="me">
       <div class="who"><span id="meName"></span><small id="meEmail"></small></div>
@@ -205,6 +208,18 @@
             <textarea id="fPart" placeholder="Your answer – describe the project / activity, items and purpose of the request"></textarea>
           </div>
         </div>
+        <h3 style="margin:22px 0 4px">Signatories (shown on the printout)</h3>
+        <p class="note" style="margin:0 0 10px">Change the names and titles any time. They are saved with the request and remembered for your next one.</p>
+        <div class="grid3">
+          <div class="field"><label class="lbl">Requested by</label>
+            <input type="text" id="sReqName" placeholder="Name"></div>
+          <div class="field"><label class="lbl">Noted by</label>
+            <input type="text" id="sNotName" placeholder="Name (leave blank to sign by hand)">
+            <input type="text" id="sNotTitle" placeholder="Title"></div>
+          <div class="field"><label class="lbl">Approved by</label>
+            <input type="text" id="sAppName" placeholder="Name (leave blank to sign by hand)">
+            <input type="text" id="sAppTitle" placeholder="Title"></div>
+        </div>
         <div class="row actions">
           <button class="btn" id="saveBtn">💾 Save request</button>
           <button class="btn gold" id="printBtn">🖨 Print</button>
@@ -227,6 +242,18 @@
         <div id="listBody">Loading…</div>
       </div>
     </section>
+    <!-- ===== LOG ===== -->
+    <section id="vLog" class="hidden">
+      <h2>Save Log</h2>
+      <p class="note">Every time a request is created, edited, deleted or printed, it is recorded here with the date, time and account.</p>
+      <div class="panel">
+        <div class="toolbar">
+          <label id="logAllWrap" class="hidden"><input type="checkbox" id="logAll"> Show everyone's activity (admin)</label>
+          <button class="btn sm ghost" id="logRefresh">↻ Refresh</button>
+        </div>
+        <div id="logBody">Loading…</div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -238,7 +265,6 @@
 const API_URL   = "https://script.google.com/macros/s/AKfycbwEvblmxsDWTX9U4PpflCSZfXsqFnHyqZXG98ljnwK4c5X0va2_H3uzW_-npUZZFlsQTA/exec";
 const CLIENT_ID = "475258710332-ij24hs1dumfhlc50t5fggkpv6l3c0ec0.apps.googleusercontent.com"; // same one as the admin portal
 const PORTAL_ORIGIN = "https://rotaryclubofmakati.github.io"; // portal is hosted on the same GitHub account
-const SIGNATORIES = { treasurer: "Club Treasurer", president: "Club President" };
 /* ================================== */
 
 const $ = s => document.querySelector(s);
@@ -279,6 +305,8 @@ async function enter(){
     if (!user.picture) $("#mePic").classList.add("hidden");
     $("#fEmail").value = user.email;
     $("#allWrap").classList.toggle("hidden", user.role !== "admin");
+    $("#logAllWrap").classList.toggle("hidden", user.role !== "admin");
+    if (!$("#sReqName").value) loadSigs();
     $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
     if (!$("#fCommittee").value && !$("#fPayee").value) loadDraft();
   } catch(e) { showLogin(e.message.includes("fetch") ? "Cannot reach the server. Check the API_URL and deployment." : e.message); }
@@ -325,7 +353,9 @@ function show(t){
   document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
   $("#vNew").classList.toggle("hidden", t !== "new");
   $("#vList").classList.toggle("hidden", t !== "list");
+  $("#vLog").classList.toggle("hidden", t !== "log");
   if (t === "list") loadList();
+  if (t === "log") loadLog();
 }
 document.querySelectorAll("#nav button").forEach(b => b.onclick = () => show(b.dataset.t));
 
@@ -349,12 +379,24 @@ $("#fAmount").addEventListener("blur", () => { const n = parseAmt($("#fAmount").
 $("#fAmount").addEventListener("focus", () => { const n = parseAmt($("#fAmount").value); $("#fAmount").value = n ? String(n) : ""; });
 
 /* ---------- form state ---------- */
-const fields = () => ({ type:$("#fType").value, committee:$("#fCommittee").value.trim(), payee:$("#fPayee").value.trim(),
+const SIG_DEFAULT = { notedTitle:"Club Treasurer", approvedTitle:"Club President" };
+const sigs = () => ({ requestedBy:$("#sReqName").value.trim(), notedBy:$("#sNotName").value.trim(), notedTitle:$("#sNotTitle").value.trim(),
+  approvedBy:$("#sAppName").value.trim(), approvedTitle:$("#sAppTitle").value.trim() });
+function fillSigs(r){
+  $("#sReqName").value = r.requestedBy || (user && user.name) || ""; $("#sNotName").value = r.notedBy || "";
+  $("#sNotTitle").value = r.notedTitle || SIG_DEFAULT.notedTitle; $("#sAppName").value = r.approvedBy || "";
+  $("#sAppTitle").value = r.approvedTitle || SIG_DEFAULT.approvedTitle;
+}
+function loadSigs(){ let d = {}; try{ d = JSON.parse(localStorage.getItem("rcm_budget_sigs")||"{}"); }catch(_){} d.requestedBy = d.requestedBy || ""; fillSigs(d); }
+function rememberSigs(){ try{ localStorage.setItem("rcm_budget_sigs", JSON.stringify(sigs())); }catch(_){} }
+["sReqName","sNotName","sNotTitle","sAppName","sAppTitle"].forEach(id => $("#"+id).addEventListener("input", rememberSigs));
+const fields = () => ({ ...sigs(), type:$("#fType").value, committee:$("#fCommittee").value.trim(), payee:$("#fPayee").value.trim(),
   dateNeeded:$("#fDate").value, amount:parseAmt($("#fAmount").value), particulars:$("#fPart").value.trim() });
 function fillForm(r){
   $("#fType").value = r.type || "Check payable"; $("#fCommittee").value = r.committee || ""; $("#fPayee").value = r.payee || "";
   $("#fDate").value = r.dateNeeded || ""; $("#fAmount").value = r.amount ? Number(r.amount).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}) : "";
   $("#fPart").value = r.particulars || ""; $("#fWords").textContent = amountWords(r.amount);
+  if (r.id) fillSigs(r); else loadSigs();
 }
 function setEditing(id, ref){
   editId = id || ""; editRef = ref || "";
@@ -370,7 +412,7 @@ function valid(f){
 }
 /* unsent draft is remembered in this browser only */
 function saveDraft(){ if (editId) return; try{ localStorage.setItem("rcm_budget_draft", JSON.stringify(fields())); }catch(_){} }
-function loadDraft(){ try{ const d = JSON.parse(localStorage.getItem("rcm_budget_draft")||"null"); if (d) fillForm(d); }catch(_){} }
+function loadDraft(){ try{ const d = JSON.parse(localStorage.getItem("rcm_budget_draft")||"null"); if (d) { const keep = sigs(); fillForm(d); fillSigs(keep); } }catch(_){} }
 ["fType","fCommittee","fPayee","fDate","fPart"].forEach(id => $("#"+id).addEventListener("input", saveDraft));
 
 $("#clearBtn").onclick = () => { if (editId || fields().committee || fields().payee || fields().particulars) { if (!confirm("Clear the form and start a new request?")) return; } clearForm(); };
@@ -422,6 +464,23 @@ $("#q").oninput = renderList;
 $("#allChk").onchange = loadList;
 $("#refreshBtn").onclick = loadList;
 
+/* ---------- save log ---------- */
+const ACT = { created:"Created", updated:"Edited", deleted:"Deleted", printed:"Printed" };
+async function loadLog(){
+  const all = user.role === "admin" && $("#logAll").checked;
+  $("#logBody").textContent = "Loading…";
+  const j = await guard(() => api("log", { all }));
+  if (!j) { $("#logBody").textContent = "Could not load the log."; return; }
+  if (!j.log.length) { $("#logBody").innerHTML = '<p class="note">No activity yet.</p>'; return; }
+  $("#logBody").innerHTML = `<table class="list"><thead><tr><th>Date &amp; time</th><th>Action</th><th>Ref</th><th>Details</th>${all?"<th>By</th>":""}</tr></thead><tbody>${
+    j.log.map(x => `<tr><td data-label="When">${esc(new Date(x.time).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}))}</td>
+      <td data-label="Action"><span class="badge${x.action==='deleted'?' new':''}">${esc(ACT[x.action]||x.action)}</span></td>
+      <td data-label="Ref"><b>${esc(x.ref)}</b></td><td data-label="Details">${esc(x.detail)}</td>${all?`<td data-label="By">${esc(x.email)}</td>`:""}</tr>`).join("")
+  }</tbody></table>`;
+}
+$("#logAll").onchange = loadLog;
+$("#logRefresh").onclick = loadLog;
+
 /* ---------- print ---------- */
 const longDate = iso => { if(!iso) return ""; const d = new Date(iso.length===10 ? iso+"T00:00:00" : iso); return isNaN(d) ? iso : d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}); };
 function printRequest(r){
@@ -442,9 +501,9 @@ function printRequest(r){
       <tr><td class="k">Requested by (account)</td><td>${esc(by)}<br><span style="font-size:10pt">${esc(r.email || user.email)}</span></td></tr>
     </table>
     <div class="sigs">
-      <div><div class="line">${esc(by)}</div><small>Requested by / Committee Chair</small></div>
-      <div><div class="line">&nbsp;</div><small>Noted by: ${esc(SIGNATORIES.treasurer)}</small></div>
-      <div><div class="line">&nbsp;</div><small>Approved by: ${esc(SIGNATORIES.president)}</small></div>
+      <div><div class="line">${esc(r.requestedBy || by)}</div><small>Requested by</small></div>
+      <div><div class="line">${r.notedBy ? esc(r.notedBy) : "&nbsp;"}</div><small>Noted by${r.notedTitle ? ": " + esc(r.notedTitle) : ""}</small></div>
+      <div><div class="line">${r.approvedBy ? esc(r.approvedBy) : "&nbsp;"}</div><small>Approved by${r.approvedTitle ? ": " + esc(r.approvedTitle) : ""}</small></div>
     </div>
     <div class="treas"><b>For Treasurer's use</b><div class="cols">
       <div>Check no.<span></span></div><div>Bank<span></span></div><div>Date released<span></span></div></div></div>
@@ -462,10 +521,11 @@ function printRequest(r){
     $("#printArea").innerHTML = html;
     setTimeout(() => window.print(), 50);
   }
+  if (r.id) api("printed", { id: r.id }).catch(() => {});      // record the print in the Save Log
 }
 $("#printBtn").onclick = () => {
   const f = fields(); if (!valid(f)) return;
-  printRequest({ ...f, ref: editRef, email: user.email, name: user.name, createdAt: editId ? (list.find(x=>x.id===editId)||{}).createdAt : "" });
+  printRequest({ ...f, id: editId, ref: editRef, email: user.email, name: user.name, createdAt: editId ? (list.find(x=>x.id===editId)||{}).createdAt : "" });
 };
 </script>
 </body>
