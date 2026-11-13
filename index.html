@@ -101,7 +101,7 @@
 
   /* ---------- printable request ---------- */
   #printArea{display:none}
-  .sheet{font-family:Georgia,"Times New Roman",serif;color:#000;font-size:11.5pt;line-height:1.35;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
+  .sheet{font-family:Georgia,"Times New Roman",serif;color:#000;font-size:11.5pt;line-height:1.35;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;padding:18mm 16mm 14mm}
   .sheet *{box-sizing:border-box}
   .sheet .lh{text-align:center;border-bottom:3px double #17458f;padding-bottom:8px;margin-bottom:12px}
   .sheet .lgo{width:54px;height:54px;border-radius:50%;background:#f7a81b;color:#0f2f66;border:3px solid #17458f;display:grid;place-items:center;font:bold 15pt system-ui,Arial,sans-serif;margin:0 auto 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -125,7 +125,7 @@
   .sheet .treas .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
   .sheet .treas span{display:block;border-bottom:1px solid #000;height:18px;margin-top:4px}
   .sheet .foot{margin-top:16px;font-size:8.5pt;color:#555;text-align:center}
-  @page{size:auto;margin:16mm 15mm}
+  @page{size:auto;margin:0}
   @media print{
     html,body{background:#fff}
     #login,#app,#toast{display:none!important}
@@ -225,6 +225,7 @@
           <button class="btn gold" id="printBtn">🖨 Print</button>
           <button class="btn ghost" id="clearBtn">Clear / New</button>
         </div>
+        <p class="note" style="margin-bottom:2px">Version 2026-11-13c</p>
         <p class="note">Tip: <b>Print</b> works before or after saving. Saved requests can be reopened, edited and reprinted from <b>My Requests</b>.</p>
       </div>
     </section>
@@ -507,7 +508,7 @@ function printRequest(r){
     </div>
     <div class="treas"><b>For Treasurer's use</b><div class="cols">
       <div>Check no.<span></span></div><div>Bank<span></span></div><div>Date released<span></span></div></div></div>
-    <div class="foot">Generated from the RCM Admin Portal · ${esc(new Date().toLocaleString("en-PH"))}</div>
+    <div class="foot">v2026-11-13c · Generated from the RCM Admin Portal · ${esc(new Date().toLocaleString("en-PH"))}</div>
   </div>`;
   // Print from a clean window so the letterhead always shows (printing from inside the portal's frame is unreliable)
   const w = window.open("", "_blank");
