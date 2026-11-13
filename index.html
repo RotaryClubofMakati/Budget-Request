@@ -225,7 +225,7 @@
           <button class="btn gold" id="printBtn">🖨 Print</button>
           <button class="btn ghost" id="clearBtn">Clear / New</button>
         </div>
-        <p class="note" style="margin-bottom:2px">Version 2026-11-13c</p>
+        <p class="note" style="margin-bottom:2px">Version 2026-11-13d</p>
         <p class="note">Tip: <b>Print</b> works before or after saving. Saved requests can be reopened, edited and reprinted from <b>My Requests</b>.</p>
       </div>
     </section>
@@ -488,7 +488,7 @@ function printRequest(r){
   const types = ["Check payable","Reimbursement","Cash advance","Other operating expense"];
   const by = r.name || (r.email === user.email ? user.name : "") || r.email;
   const html = `<div class="sheet">
-    <div class="lh"><div class="lgo">RCM</div><div class="club">ROTARY CLUB OF MAKATI</div><div class="sub">Admin Systems · Budget Request</div></div>
+    <div class="lh"><div class="club">ROTARY CLUB OF MAKATI</div><div class="sub">Admin Systems · Budget Request</div></div>
     <h1>BUDGET REQUEST FORM</h1>
     <p class="desc">For check payables to club projects, reimbursements, cash advances and other operating expenses incurred in implementing activities / programs.</p>
     <div class="meta"><span><b>Ref. No.:</b> ${esc(r.ref || "— (not yet saved)")}</span><span><b>Date prepared:</b> ${esc(longDate(r.createdAt || new Date().toISOString()))}</span></div>
@@ -508,7 +508,7 @@ function printRequest(r){
     </div>
     <div class="treas"><b>For Treasurer's use</b><div class="cols">
       <div>Check no.<span></span></div><div>Bank<span></span></div><div>Date released<span></span></div></div></div>
-    <div class="foot">v2026-11-13c · Generated from the RCM Admin Portal · ${esc(new Date().toLocaleString("en-PH"))}</div>
+    <div class="foot">v2026-11-13d · Generated from the RCM Admin Portal · ${esc(new Date().toLocaleString("en-PH"))}</div>
   </div>`;
   // Print from a clean window so the letterhead always shows (printing from inside the portal's frame is unreliable)
   const w = window.open("", "_blank");
